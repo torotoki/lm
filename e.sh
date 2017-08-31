@@ -1,0 +1,1 @@
+echo $LM_LOGS_PATH
