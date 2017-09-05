@@ -20,12 +20,15 @@ class Initializer:
       elif choice in ['n', 'no']:
         return False
       
+  def execute(self, query):
+    print(query)
+    return self.conn.execute(query)
 
   def mk_dir_conf(self, init_directory):
     if path.exists(init_directory):
       self.yes_no_input("config directory already exists: %s\n"
                         % str(init_directory) \
-                        + "Are you sure to re-initalize the directory?")
+                        + "Are you want sure to reinitalize the directory?")
       shutil.rmtree(init_directory)
     makedirs(init_directory, exist_ok=True)
 

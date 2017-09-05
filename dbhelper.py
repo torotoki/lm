@@ -43,7 +43,7 @@ class Configure:
       metadata = json.loads(json_tree)
 
       # get num_exp
-      num_executed_exp = metadata['num_executed_exp']
+      num_executed_exp = metadata['num_executed_exp']+1
 
       # increment num_exp
       metadata['num_executed_exp'] += 1
@@ -54,6 +54,5 @@ class Configure:
         UPDATE metadata SET json = json('%s')
         """ % json.dumps(metadata)
       )
-      import pdb; pdb.set_trace()
 
-    return metadata
+    return num_executed_exp
