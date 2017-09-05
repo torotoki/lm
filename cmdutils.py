@@ -22,19 +22,22 @@ class Executor:
     self.commands = args.commands
     self.use_nohup = args.use_nohup
 
+    
+
     log_dir, lognum = self.decide_log_dir()
     self.create_log_dir(log_dir)
     self.log_dir = log_dir
     self.lognum = lognum
     self.args = args
 
-    self.stdout_path = log_dir + '/' + 'stdout.txt'
-    self.stderr_path = log_dir + '/' + 'stderr.txt'
+    self.stdout_path = path.join(log_dir, stdout.txt)
+    self.stderr_path = path.join(log_dir, stderr.txt)
 
 
   def decide_log_dir(self):
     num = 1
-    return ("logs/%d.exp" % num, num)
+    p = path.join(log_dir, "%d.exp" % num)
+    return (p, num)
 
   def create_log_dir(self, log_dir):
     if path.exists(path.dirname(log_dir)):
