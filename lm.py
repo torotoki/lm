@@ -5,7 +5,7 @@ from __future__ import print_function
 import sys
 import argparse
 from os import path, makedirs
-from cmdutils import Executor
+from run import Executor
 from init import Initializer
 
 help_message = "Usage: python [COMMAND] [options]"
@@ -26,6 +26,7 @@ def main():
     exit()
 
   parser = argparse.ArgumentParser()
+  parser.add_argument('command', type=str)
   command = sys.argv[1]
   if command=='run':
     run(parser)
