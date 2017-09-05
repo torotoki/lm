@@ -53,6 +53,9 @@ class Executor:
     makedirs(log_dir)
 
   def execute(self):
+
+    experiment_start()
+
     try:
       cmd = ' '.join(
         ["{",
