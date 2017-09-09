@@ -1,5 +1,8 @@
+from sys import stderr
 from os import system, path, makedirs
-from dbhelper import Configure, DEFAULT_CONF_DIR
+from dbhelper import Configure, ExperimentManager
+from dbhelper import DEFAULT_CONF_DIR
+import sqlite3
 
 path_variable = 'LM_LOGS_PATH'
 DEFAULT_PARENT_LOG_DIRECTORY = './logs/'
@@ -25,7 +28,14 @@ class Executor:
     self.commands = args.commands
     self.use_nohup = args.use_nohup
 
-    self.conf = Configure()
+    try:
+      self.conf = Configure()
+      self.manager = ExperimentManager()
+    except sqlite3.OperationalError:
+      print("Erro: cannot connect to the database", file=stderr)
+      print("Please use 'python lm.py init' in the "
+            + "current directory before execusion.\n")
+      exit()
 
     log_dir, exp_id = self.decide_log_dir(self.conf)
     self.create_log_dir(log_dir)
@@ -52,9 +62,18 @@ class Executor:
         "the unique log folder is already exists:",log_dir)
     makedirs(log_dir)
 
+  def experiment_start(self):
+    print("The experiment is started.")
+    self.manager.experiment_start(self.exp_id)
+
+  def experiment_end(self):
+    self.manager.experiment_end(self.stdout_path,
+                                self.stderr_path)
+    print("The experiment is finished.")
+
   def execute(self):
 
-    experiment_start()
+    self.experiment_start()
 
     try:
       cmd = ' '.join(
@@ -73,3 +92,5 @@ class Executor:
     except (KeyboardInterrupt, SystemExit):
       print ("\naborted.")
       raise
+
+    self.experiment_end()

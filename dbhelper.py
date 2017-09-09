@@ -1,3 +1,4 @@
+import os
 from os import system, path, makedirs
 import sqlite3
 import json
@@ -28,7 +29,7 @@ class Configure:
     self.conn, self.cursor = init_database(db_path)
     self.STATS = {
       'num_executed_exp': 0,
-      'created_by': uname()
+      'created_by': os.uname()
     }
 
     with self.conn:
@@ -52,7 +53,7 @@ class Configure:
       ## each experiment metadata (bundles)
       self.execute(
         """
-        CREATE TABLE bundles (json JSON)
+        CREATE TABLE bundles (json JSON, exp_id integer)
         """
       )
 
@@ -103,6 +104,7 @@ class ExperimentManager:
   db_path = None
   conn = None
   cursor = None
+  stats = {}
 
   STATE_PROCESSING = 'state_processing'
   STATE_FINISHED   = 'state_finished'
@@ -119,34 +121,51 @@ class ExperimentManager:
   def __init__(self):
     self.db_path = solve_db_path(DEFAULT_CONF_DIR,
                                  DEFAULT_DB_NAME)
-    self.conn = init_database(self.db_path)
+    (self.conn, self.cursor) = init_database(self.db_path)
 
   def experiment_start(self, exp_id):
-    stats = {}
-
-    stats['exp_id'] = exp_id
-    stats['uname']  = os.uname()
-    stats['state']  = STATE_PROCESSING
+    self.stats['exp_id'] = exp_id
+    self.stats['uname']  = os.uname()
+    self.stats['state']  = self.STATE_PROCESSING
 
     start_time = datetime.datetime.now()
-    STATS['start_time'] = start_time.isoformat()
+    self.stats['start_time'] = start_time.isoformat()
 
-    ...
+    with self.conn:
+      self.execute(
+        """
+        INSERT INTO bundles (exp_id, json)
+        VALUES (
+          %d,
+          json('%s')
+        );
+        """ % (exp_id, json.dumps(self.stats))
+      )
 
-  def tail(fname, n=2):
-    return subprocess.check_output(['tail', '-%d'%n, fname])
+  def tail(self, fname, n=2):
+    binary_out = subprocess.check_output(
+      ['tail', '-%d'%n, fname]
+    )
+    return binary_out.decode('utf-8')
 
   def experiment_end(self, stdout_path, stderr_path):
-    stats = {
-      'state': STATE_FINISHED,
-      'stdout_size': path.getsize(stdout_path),
-      'stderr_size': path.getsize(stderr_path),
-      'stdout_lastlines': self.tail(stdout_path),
-      'stderr_lastlines': self.tail(stderr_path)
-    }
+    self.stats['state'] = self.STATE_FINISHED
+    self.stats['stdout_size'] = path.getsize(stdout_path)
+    self.stats['stderr_size'] = path.getsize(stderr_path)
+    self.stats['stdout_lastlines'] = self.tail(stdout_path)
+    self.stats['stderr_lastlines'] = self.tail(stderr_path)
 
     end_time = datetime.datetime.now()
-    stats['end_time'] = end_time.isoformat()
+    self.stats['end_time'] = end_time.isoformat()
 
-    ...
+    with self.conn:
+      exp_id = self.stats['exp_id']
+
+      self.execute(
+        """
+        UPDATE bundles
+        SET json = json('%s')
+        WHERE exp_id = %d;
+        """ % (json.dumps(self.stats), exp_id)
+      )
 

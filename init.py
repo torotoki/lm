@@ -1,6 +1,7 @@
 import json
 import shutil
 from os import path, makedirs, uname
+from dbhelper import Configure
 from dbhelper import solve_db_path, init_database
 from dbhelper import DEFAULT_DB_NAME, DEFAULT_CONF_DIR
 
