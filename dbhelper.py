@@ -128,6 +128,8 @@ class ExperimentManager:
   STATE_ABORTED    = 'state_aborted'
   STATE_ERROR      = 'state_error'
 
+  
+
   def __init__(self):
     self.db_path = solve_db_path(DEFAULT_CONF_DIR,
                                  DEFAULT_DB_NAME)
@@ -225,3 +227,20 @@ class ExperimentManager:
     return results
 
   ### FUNCTIONS FOR OBTAINING DATA END ###
+
+
+  ### FUNCTON FOR REMOVING DATA
+  def remove_data(self, specification):
+    with self.conn:
+      if specification.isdigit():
+        specification = 'exp_id = %s' % specification
+      
+      state = self.execute(
+        """
+        DELETE FROM bundles
+        WHERE %s;
+        """ % specification
+      ).fetchall()
+
+    return True
+
