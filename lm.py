@@ -7,6 +7,7 @@ import argparse
 from os import path, makedirs
 from run import Executor
 from init import Initializer
+from ls import LSCommand
 
 help_message = "Usage: python [COMMAND] [options]"
 
@@ -17,7 +18,9 @@ def run(args):
 def init(parser, args):
   initializer = Initializer(parser)
 
-
+def ls(parser):
+  cmd = LSCommand(parser)
+  cmd.printout()
 
 def main():
   if len(sys.argv) < 2:
@@ -32,6 +35,8 @@ def main():
     run(parser)
   elif command=='init':
     init(parser, sys.argv)
+  elif command=='ls':
+    ls(parser)
   else:
     print(help_message)
 

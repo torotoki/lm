@@ -17,6 +17,10 @@ if __name__ == '__main__':
     tests_require=[],
     include_package_data=True,
     zip_safe=False,
+    entry_points="""
+    [console_scripts]
+    lm = lm.lm:main
+    """,
   )
 
 

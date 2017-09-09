@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import json
 import shutil
 from os import path, makedirs, uname

@@ -1,4 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from sys import stderr
+import subprocess
 from os import system, path, makedirs
 from dbhelper import Configure, ExperimentManager
 from dbhelper import DEFAULT_CONF_DIR
@@ -63,13 +67,23 @@ class Executor:
     makedirs(log_dir)
 
   def experiment_start(self):
-    print("The experiment is started.")
+    print("#### The Experiment is Started. ####")
     self.manager.experiment_start(self.exp_id)
 
-  def experiment_end(self):
-    self.manager.experiment_end(self.stdout_path,
-                                self.stderr_path)
-    print("The experiment is finished.")
+  def experiment_completed(self):
+    self.manager.experiment_completed(self.stdout_path,
+                                      self.stderr_path)
+    print("#### The Experiment is Completed. ####")
+
+  def experiment_aborted(self):
+    self.manager.experiment_aborted(self.stdout_path,
+                                    self.stderr_path)
+    print("#### The Experiment is Aborted. ####")
+
+  def experiment_error(self):
+    self.manager.experiment_error(self.stdout_path,
+                                  self.stderr_path)
+    print("#### The Experiment Raises An Error. ####")
 
   def execute(self):
 
@@ -87,10 +101,15 @@ class Executor:
          "| tee %s;" % self.stderr_path,
          "} 3>&2 2>&1 1>&3"]
       )
-      print("Execute: %s" % cmd)
-      state = system(cmd)
+      print("Executed shell command:")
+      print("  -", cmd)
+      # Replaced os.system to subprocess.run (python 3.5 is required)
+      ## state = system(cmd)
+      state = subprocess.run(cmd, shell=True, check=True)
+      self.experiment_completed()
     except (KeyboardInterrupt, SystemExit):
       print ("\naborted.")
-      raise
-
-    self.experiment_end()
+      self.experiment_aborted()
+    except subprocess.CalledProcessError:
+      print ("\ncrashed.")
+      self.experiment_error()

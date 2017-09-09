@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 from os import system, path, makedirs
 import sqlite3
@@ -15,7 +18,14 @@ def init_database(db_path):
   cursor = conn.cursor()
   return (conn, cursor)
 
+
 class Configure:
+  '''
+  This class is an interface of the administrative
+  metadata in the databse, which is for
+  entire experiments.
+  '''
+
   db_path = None
   conn = None
   cursor = None
@@ -101,15 +111,27 @@ import os
 import subprocess
 
 class ExperimentManager:
+  '''
+  This class is the interface of the bundles database.
+  The purposes of this class are:
+    1) executing an experiment under the control of the database,
+    2) accessing the all data in the database
+  '''
+
   db_path = None
   conn = None
   cursor = None
   stats = {}
 
   STATE_PROCESSING = 'state_processing'
-  STATE_FINISHED   = 'state_finished'
+  STATE_COMPLETED   = 'state_completed'
   STATE_ABORTED    = 'state_aborted'
   STATE_ERROR      = 'state_error'
+
+  def __init__(self):
+    self.db_path = solve_db_path(DEFAULT_CONF_DIR,
+                                 DEFAULT_DB_NAME)
+    (self.conn, self.cursor) = init_database(self.db_path)
 
   def execute(self, query):
     print("Executed SQLite command:")
@@ -117,12 +139,16 @@ class ExperimentManager:
       print("  -", line)
     return self.conn.execute(query)
 
+  ### UTILITY ###
+  def tail(self, fname, n=2):
+    binary_out = subprocess.check_output(
+      ['tail', '-%d'%n, fname]
+    )
+    return binary_out.decode('utf-8')
+  ### UTILITY END ###
 
-  def __init__(self):
-    self.db_path = solve_db_path(DEFAULT_CONF_DIR,
-                                 DEFAULT_DB_NAME)
-    (self.conn, self.cursor) = init_database(self.db_path)
 
+  ### FUNCTIONS FOR EXECUTION ###
   def experiment_start(self, exp_id):
     self.stats['exp_id'] = exp_id
     self.stats['uname']  = os.uname()
@@ -142,14 +168,12 @@ class ExperimentManager:
         """ % (exp_id, json.dumps(self.stats))
       )
 
-  def tail(self, fname, n=2):
-    binary_out = subprocess.check_output(
-      ['tail', '-%d'%n, fname]
-    )
-    return binary_out.decode('utf-8')
-
   def experiment_end(self, stdout_path, stderr_path):
-    self.stats['state'] = self.STATE_FINISHED
+    '''
+    All the endpoints should call this function.
+    It includes completed, aborted, and crashed (error) cases.
+    '''
+
     self.stats['stdout_size'] = path.getsize(stdout_path)
     self.stats['stderr_size'] = path.getsize(stderr_path)
     self.stats['stdout_lastlines'] = self.tail(stdout_path)
@@ -169,3 +193,35 @@ class ExperimentManager:
         """ % (json.dumps(self.stats), exp_id)
       )
 
+  def experiment_completed(self, stdout_path, stderr_path):
+    self.stats['state'] = self.STATE_COMPLETED
+    self.experiment_end(stdout_path, stderr_path)
+
+  def experiment_aborted(self, stdout_path, stderr_path):
+    self.stats['state'] = self.STATE_ABORTED
+    self.experiment_end(stdout_path, stderr_path)
+
+  def experiment_error(self, stdout_path, stderr_path):
+    self.stats['state'] = self.STATE_ERROR
+    self.experiment_end(stdout_path, stderr_path)
+
+  ### FUNCTIONS FOR EXECUTIONS END ###
+
+
+  ### FUNCTIONS FOR OBTAINING DATA ###
+
+  def get_json_list(self):
+    with self.conn:
+      fetched = self.execute(
+        """
+        SELECT json FROM bundles;
+        """
+      ).fetchall()
+
+    # extract json data from the database
+    results = [json.loads(column[0]) for column in fetched]
+    results = sorted(results, key=lambda k: k['exp_id']) 
+
+    return results
+
+  ### FUNCTIONS FOR OBTAINING DATA END ###
