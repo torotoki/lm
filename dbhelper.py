@@ -128,7 +128,7 @@ class ExperimentManager:
   STATE_ABORTED    = 'state_aborted'
   STATE_ERROR      = 'state_error'
 
-  
+  start_time = None
 
   def __init__(self):
     self.db_path = solve_db_path(DEFAULT_CONF_DIR,
@@ -158,6 +158,7 @@ class ExperimentManager:
 
     start_time = datetime.datetime.now()
     self.stats['start_time'] = start_time.isoformat()
+    self.start_time = start_time
 
     with self.conn:
       self.execute(
@@ -175,13 +176,15 @@ class ExperimentManager:
     All the endpoints should call this function.
     It includes completed, aborted, and crashed (error) cases.
     '''
+    end_time = datetime.datetime.now()
 
     self.stats['stdout_size'] = path.getsize(stdout_path)
     self.stats['stderr_size'] = path.getsize(stderr_path)
     self.stats['stdout_lastlines'] = self.tail(stdout_path)
     self.stats['stderr_lastlines'] = self.tail(stderr_path)
 
-    end_time = datetime.datetime.now()
+    exec_time = end_time - self.start_time
+    self.stats['exec_time'] = exec_time.total_seconds()
     self.stats['end_time'] = end_time.isoformat()
 
     with self.conn:
