@@ -151,8 +151,9 @@ class ExperimentManager:
 
 
   ### FUNCTIONS FOR EXECUTION ###
-  def experiment_start(self, exp_id):
+  def experiment_start(self, exp_id, commands):
     self.stats['exp_id'] = exp_id
+    self.stats['commands'] = commands
     self.stats['uname']  = os.uname()
     self.stats['state']  = self.STATE_PROCESSING
 

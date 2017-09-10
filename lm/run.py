@@ -68,7 +68,8 @@ class Executor:
 
   def experiment_start(self):
     print("#### The Experiment is Started. ####")
-    self.manager.experiment_start(self.exp_id)
+    self.manager.experiment_start(self.exp_id,
+                                  self.commands)
 
   def experiment_completed(self):
     self.manager.experiment_completed(self.stdout_path,
