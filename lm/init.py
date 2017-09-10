@@ -4,9 +4,9 @@
 import json
 import shutil
 from os import path, makedirs, uname
-from dbhelper import Configure
-from dbhelper import solve_db_path, init_database
-from dbhelper import DEFAULT_DB_NAME, DEFAULT_CONF_DIR
+from lm.dbhelper import Configure
+from lm.dbhelper import solve_db_path, init_database
+from lm.dbhelper import DEFAULT_DB_NAME, DEFAULT_CONF_DIR
 
 class Initializer:
   db_name = DEFAULT_DB_NAME

@@ -21,12 +21,13 @@ setup(
   author_email='hiroyoshi.komat@gmail.com',
   url='https://github.com/torotoki/lm',
   classifiers=[],
-  packages=['lm'],
+  packages=['lm', 'lm.command'],
   long_description=read('README.md'),
-  entry_points="""
+  entry_points=
+    """
     [console_scripts]
     lm = lm.lm:main
-  """,
+    """,
 )
 
 

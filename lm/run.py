@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sys import stderr
 import subprocess
-from os import system, path, makedirs
-from dbhelper import Configure, ExperimentManager
-from dbhelper import DEFAULT_CONF_DIR
 import sqlite3
+from sys import stderr
+from os import system, path, makedirs
+from lm.dbhelper import Configure, ExperimentManager
+from lm.dbhelper import DEFAULT_CONF_DIR
 
 path_variable = 'LM_LOGS_PATH'
 DEFAULT_PARENT_LOG_DIRECTORY = './logs/'

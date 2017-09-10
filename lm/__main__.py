@@ -1,1 +1,1 @@
-import lm; lm.main()
+from lm import lm; lm.main()

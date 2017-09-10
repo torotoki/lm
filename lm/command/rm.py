@@ -1,4 +1,4 @@
-from dbhelper import ExperimentManager
+from lm.dbhelper import ExperimentManager
 
 def rm(parser):
   parser.add_argument('specification', type=str)

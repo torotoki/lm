@@ -5,10 +5,10 @@ from __future__ import print_function
 import sys
 import argparse
 from os import path, makedirs
-from run import Executor
-from init import Initializer
-from command.ls import LSCommand
-from command.rm import rm
+from lm.run import Executor
+from lm.init import Initializer
+from lm.command.ls import LSCommand
+from lm.command.rm import rm
 
 help_message = "Usage: python [COMMAND] [options]"
 

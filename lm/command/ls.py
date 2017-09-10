@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pprint import pprint
-from dbhelper import ExperimentManager
+from lm.dbhelper import ExperimentManager
 
 class LSCommand:
   show_long_flag = False
