@@ -90,23 +90,27 @@ class Executor:
 
     self.experiment_start()
 
+    # create files
+    open(self.stdout_path, 'a').close()
+    open(self.stderr_path, 'a').close()
+
     try:
+      # Note:
+      # This solution does not work in sh.
+      # See https://stackoverflow.com/questions/692000/how-do-i-write-stderr-to-a-file-while-using-tee-with-a-pipe
       cmd = ' '.join(
-        ["{",
-         "{",
-         "env %s=%s" % (path_variable, self.log_dir),
+        ["env %s=%s" % (path_variable, self.log_dir),
          "nohup" if self.use_nohup else "",
          "%s" % self.commands,
-         "| tee %s;" % self.stdout_path,
-         "} 3>&2 2>&1 1>&3",
-         "| tee %s;" % self.stderr_path,
-         "} 3>&2 2>&1 1>&3"]
+         ">  >(tee %s) " % self.stdout_path,
+         "2> >(tee %s >&2)" % self.stderr_path]
       )
       print("Executed shell command:")
       print("  -", cmd)
       # Replaced os.system to subprocess.run (python 3.5 is required)
       ## state = system(cmd)
-      state = subprocess.run(cmd, shell=True, check=True)
+      state = subprocess.run(cmd, shell=True, check=True,
+                             executable='/bin/bash')
       self.experiment_completed()
     except (KeyboardInterrupt, SystemExit):
       print ("\naborted.")
