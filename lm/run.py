@@ -3,8 +3,6 @@
 
 import subprocess
 import sqlite3
-import sys
-import os
 from sys import stderr
 from os import system, path, makedirs
 from lm.dbhelper import Configure, ExperimentManager
@@ -27,7 +25,13 @@ class Executor:
 
   conf = None
 
-  def open_database(self):
+  def __init__(self, parser):
+    parser.add_argument('commands', type=str)
+    parser.add_argument('--use_nohup', default=True, type=bool)
+    args = parser.parse_args()
+    self.commands = args.commands
+    self.use_nohup = args.use_nohup
+
     try:
       self.conf = Configure()
       self.manager = ExperimentManager()
@@ -36,16 +40,6 @@ class Executor:
       print("Please use 'python lm.py init' in the "
             + "current directory before execusion.\n")
       exit()
-
-
-  def __init__(self, parser):
-    parser.add_argument('commands', type=str)
-    parser.add_argument('--use_nohup', default=True, type=bool)
-    args = parser.parse_args()
-    self.commands = args.commands
-    self.use_nohup = args.use_nohup
-
-    self.open_database()
 
     log_dir, exp_id = self.decide_log_dir(self.conf)
     self.create_log_dir(log_dir)
@@ -93,41 +87,6 @@ class Executor:
     print("#### The Experiment Raises An Error. ####")
 
   def execute(self):
-    # do the UNIX double-fork magic, see Stevens' "Advanced
-    # Programming in the UNIX Environment" for details
-    # (ISBN 0201563177)
-
-    try:
-      pid = os.fork()
-      if pid > 0:
-        # parent process, return and keep running
-        return
-    except OSError as e:
-      print("fork #1 failed: %d (%s)" \
-            % (e.errno, e.strerror), file=sys.stderr)
-      sys.exit(1)
-
-    os.setsid()
-
-    # do second fork
-    try:
-      pid = os.fork()
-      if pid > 0:
-        # exit from second parent
-        sys.exit(0)
-    except OSError as e:
-      print("fork #2 failed: %d (%s)" \
-            % (e.errno, e.strerror), file=sys.stderr)
-      sys.exit(1)
-
-    # do stuff
-    self._execute()
-
-    # all done
-    os._exit(os.EX_OK)
-  
-
-  def _execute(self):
 
     self.experiment_start()
 
@@ -148,14 +107,11 @@ class Executor:
       )
       print("Executed shell command:")
       print("  -", cmd)
-
+      # Replaced os.system to subprocess.run (python 3.5 is required)
+      ## state = system(cmd)
       state = subprocess.run(cmd, shell=True, check=True,
                              executable='/bin/bash')
-
-      # reopen the database to connect from the daemon
-      self.open_database()
       self.experiment_completed()
-
     except (KeyboardInterrupt, SystemExit):
       print ("\naborted.")
       self.experiment_aborted()
