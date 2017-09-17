@@ -21,7 +21,7 @@ setup(
   author_email='hiroyoshi.komat@gmail.com',
   url='https://github.com/torotoki/lm',
   classifiers=[],
-  packages=['lm', 'lm.command'],
+  packages=['lm', 'lm.command', 'lm.utils'],
   long_description=read('README.md'),
   entry_points=
     """

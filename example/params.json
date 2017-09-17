@@ -1,0 +1,38 @@
+{
+    "header": "lm run 'python exp.py",
+    "footer": "'",
+    "N": 40,
+    "range_criteria" : {
+        "lr": [0.00001, 0.9],
+        "eval_seq_length": [800, 1000, 100],
+        "embedding_keep_rate": [0.8, 1.0, 0.1],
+        "learning_rate": [0.0007, 0.9, 0.0001],
+        "mlp_dim": [512, 1024, 2048, 4096],
+        "l2_lambda": [1.0e-07, 1.0e-5, 1.0e-6],
+        "semantic_classifier_keep_rate": [0.5, 0.8, 0.1],
+        "model_dim": [300, 600, 900],
+        "num_mlp_layers": [1, 2],
+    },
+    "choice_criteria": {
+        "statistics_interval_steps": 100,
+        "eval_interval_steps": 1000,
+        "batch_size": [16, 32, 64, 128, 256, 512],        
+        "model_type": ["ChoiPyramid"],
+        "seq_length": [80],
+        "encoder": "projection",
+        "ckpt_path": "../logs/spinn",
+        "sample_interval_steps": 1000,
+    },
+    "multicomponent_criteria": [
+        {
+            "embedding_data_path": [
+                "../glove/glove.840B.300d.txt",
+                "../glove/glove.60B.200d.txt"
+            ],
+            "word_embedding_dim": [
+                300,
+                200
+            ]
+        }
+    ]
+}
