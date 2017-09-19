@@ -143,8 +143,9 @@ class ExperimentManager:
 
   ### UTILITY ###
   def tail(self, fname, n=2):
+    # the bytes of results are restricted to 500 bytes
     binary_out = subprocess.check_output(
-      ['tail', '-%d'%n, fname]
+      ['tail', '-%d -c 500'%n, fname]
     )
     return binary_out.decode('utf-8')
   ### UTILITY END ###
