@@ -59,9 +59,9 @@ class Configure:
 
       ## each experiment metadata (bundles)
       self.execute(
-        """
+        "
         CREATE TABLE bundles (json JSON, exp_id integer)
-        """
+        "
       )
 
       self.conn.commit()
@@ -77,13 +77,9 @@ class Configure:
   def get_and_increment_num_exp(self):
     with self.conn:
       json_tree = self.execute(
-        """
-        SELECT
-          tree.json
-        FROM
-          metadata,
-          json_tree(metadata.json) as tree
-        """
+        "
+        SELECT json FROM metadata
+        "
       ).fetchone()[0]
       metadata = json.loads(json_tree)
 
