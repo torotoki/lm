@@ -46,9 +46,7 @@ class Configure:
 
       ## overall metadata
       self.execute(
-        """
-        CREATE TABLE metadata (json JSON)
-        """
+        "CREATE TABLE metadata (json JSON)"
       )
 
       self.execute(
@@ -59,9 +57,7 @@ class Configure:
 
       ## each experiment metadata (bundles)
       self.execute(
-        "
-        CREATE TABLE bundles (json JSON, exp_id integer)
-        "
+        "CREATE TABLE bundles (json JSON, exp_id integer);"
       )
 
       self.conn.commit()
@@ -77,9 +73,7 @@ class Configure:
   def get_and_increment_num_exp(self):
     with self.conn:
       json_tree = self.execute(
-        "
-        SELECT json FROM metadata
-        "
+        "SELECT json FROM metadata"
       ).fetchone()[0]
       metadata = json.loads(json_tree)
 
@@ -92,7 +86,7 @@ class Configure:
 
       self.execute(
         """
-        UPDATE metadata SET json = json('%s')
+        UPDATE metadata SET json = '%s'
         """ % json.dumps(metadata)
       )
 
@@ -161,7 +155,7 @@ class ExperimentManager:
         INSERT INTO bundles (exp_id, json)
         VALUES (
           %d,
-          json('%s')
+          '%s'
         );
         """ % (exp_id, json.dumps(self.stats))
       )
@@ -188,7 +182,7 @@ class ExperimentManager:
       self.execute(
         """
         UPDATE bundles
-        SET json = json('%s')
+        SET json = '%s'
         WHERE exp_id = %d;
         """ % (json.dumps(self.stats), exp_id)
       )
