@@ -53,10 +53,7 @@ class Configure:
 
       self.execute(
         """
-        INSERT INTO metadata (json)
-        VALUES (
-          json('%s')
-        );
+        INSERT INTO metadata (json) VALUES ('%s');
         """ % json.dumps(self.STATS)
       )
 
